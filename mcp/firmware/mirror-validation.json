@@ -11,11 +11,11 @@
     345
   ],
   "receiver_restarted": true,
-  "cold_reconnect_ms": 24403,
-  "new_video_frame_id": 11570,
-  "new_video_frame_age_ms": 40,
+  "cold_reconnect_ms": 14226,
+  "new_video_frame_id": 74,
+  "new_video_frame_age_ms": 28,
   "final_home_screen_observed": true,
-  "final_home_frame_id": 11735,
+  "final_home_frame_id": 184,
   "lease_released": true,
   "limits": [
     "Unlocked portrait iPhone 13, fixed pointer speed and recorded Control Center layout",
@@ -23,5 +23,13 @@
     "VersaiOS_Screen is the first receiver row",
     "One earlier reconnect failed from an unverified starting screen; the final test began from visually confirmed Home",
     "No unlock/password test, clean-install test or phone reboot recovery test"
+  ],
+  "baseline_cold_reconnect_ms": 24403,
+  "intermediate_cold_reconnect_ms": 17672,
+  "broker_restarted": true,
+  "speed_changes": [
+    "Shorter mirroring-only waits",
+    "Move from mirror tile to receiver row without repeating pointer homing",
+    "Discover receiver while opening Control Center instead of sleeping another five seconds"
   ]
 }

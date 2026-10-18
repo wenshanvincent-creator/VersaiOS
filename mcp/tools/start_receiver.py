@@ -94,9 +94,9 @@ def ensure_receiver(video_converter=None, restart=False):
             time.sleep(0.25)
         else:
             raise RuntimeError("BLE discovery did not enter STARTED; see .runtime/beacon.log")
-    if not running:
-        # iOS needs time to retire the old session and discover a newly started receiver.
-        time.sleep(5)
+    # Discovery is published above. The mirror macro spends several seconds opening
+    # Control Center and its receiver list before selection, so discovery can run
+    # during those gestures instead of adding another fixed startup sleep.
     return receiver
 
 

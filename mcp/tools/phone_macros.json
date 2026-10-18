@@ -43,11 +43,11 @@
     ],
     "mirror-menu": [
       {"call": "control-center"},
-      {"move": [-1200, -2400], "wait": 0.4},
-      {"press": "FINE:160,160", "wait": 0.4},
-      {"press": "FINE:73,681", "wait": 0.4},
-      {"press": "FINE:-4,-29", "wait": 0.4},
-      {"press": "TAP", "wait": 1.5}
+      {"move": [-1200, -2400], "wait": 0.08},
+      {"press": "FINE:160,160", "wait": 0.05},
+      {"press": "FINE:73,681", "wait": 0.05},
+      {"press": "FINE:-4,-29", "wait": 0.08},
+      {"press": "TAP", "wait": 0.6}
     ],
     "close-controls": [
       {"move": [-1200, 2400], "wait": 0.3},
@@ -56,15 +56,12 @@
       {"press": "TAP", "wait": 0.8}
     ],
     "mirror-close": [
-      {"call": "dismiss-overlay"},
-      {"move": [-1200, 2400], "wait": 0.3},
-      {"press": "FINE:260,-50", "wait": 0.4},
-      {"press": "TAP", "wait": 0.6},
-      {"press": "KEY:8,11", "wait": 0.3}
-    ],
-    "dismiss-overlay": [
-      {"move": [-1200, 0], "wait": 0.3},
-      {"press": "TAP", "wait": 0.5}
+      {"move": [-1200, 0], "wait": 0.05},
+      {"press": "TAP", "wait": 0.2},
+      {"move": [-1200, 2400], "wait": 0.05},
+      {"press": "FINE:260,-50", "wait": 0.08},
+      {"press": "TAP", "wait": 0.3},
+      {"press": "KEY:8,11", "wait": 0.2}
     ],
     "hotspot-toggle": [
       {"call": "network-menu"},
@@ -75,11 +72,8 @@
     ],
     "mirror-connect": [
       {"call": "mirror-menu"},
-      {"move": [-1200, -2400], "wait": 0.4},
-      {"press": "FINE:160,160", "wait": 0.4},
-      {"press": "FINE:89,794", "wait": 0.4},
-      {"press": "FINE:-2,-32", "wait": 0.4},
-      {"press": "TAP", "wait": 1.0}
+      {"press": "FINE:14,113", "wait": 0.1},
+      {"press": "TAP", "wait": 0.25}
     ]
   }
 }
