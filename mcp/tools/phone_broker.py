@@ -16,7 +16,9 @@ from phone_coordinates import PixelPointer
 import phone_apps
 import phone_unlocking
 import phone_keyboard
+from phone_scrolling import scroll_command
 from phone_actions import ActionBatch
+from phone_current_app import AppProbe, CONFIG as APP_PROBE_CONFIG
 from phone_macro import mirror_connected, receiver_process, run_steps
 from phone_video import PhoneVideo, video_converter
 from start_receiver import ensure_receiver
@@ -35,6 +37,7 @@ class Phone:
         self.lease = None
         self.expires = 0
         self.receiver = None
+        self.app_probe = None
 
     def connected(self):
         try:
@@ -63,6 +66,21 @@ class Phone:
             if action == "release":
                 self.owner = self.lease = None
                 return {"released": True}
+            if action in ('current_app', 'current_app_setup'):
+                if not APP_PROBE_CONFIG.is_file():
+                    return {'available': False, 'reason': 'Native current-app shortcut is not configured'}
+                config = json.loads(APP_PROBE_CONFIG.read_text('utf-8'))
+                if action == 'current_app' and not config['ready']:
+                    return {'available': False, 'reason': 'Finish the iPhone shortcut and mouse-button setup first'}
+                if self.app_probe is None:
+                    self.app_probe = AppProbe(config)
+                if action == 'current_app_setup':
+                    if args.get('press_button', False):
+                        with PhoneController() as phone:
+                            phone.send('BUTTON:8')
+                    return {'report_listener': config['host'], 'port': config['port'], 'ready': config['ready']}
+                with PhoneController() as phone:
+                    return self.app_probe.query(lambda: phone.send('BUTTON:8'))
             if action == "connect":
                 if self.receiver is None or not self.receiver.is_running():
                     self.receiver = ensure_receiver(video_converter=video_converter(), restart=True)
@@ -159,6 +177,14 @@ class Phone:
                         result['screen_error'] = str(error)
                         result['retry_automatically'] = False
                 return result
+            if action == 'scroll':
+                command = scroll_command(args['direction'], args.get('steps', 4))
+                started = time.monotonic()
+                with PhoneController() as phone:
+                    phone.send(command)
+                return {'direction': args['direction'], 'steps': args.get('steps', 4),
+                        'device_acknowledged': True, 'visual_result_verified': False,
+                        'elapsed_ms': round((time.monotonic()-started)*1000)}
             commands = []
             with PhoneController() as phone:
                 if action == "macro":

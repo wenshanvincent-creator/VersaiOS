@@ -8,7 +8,9 @@
     "local_changes": [
       "Added TAP to click at the current pointer position after visual relative movement, without running coordinate re-homing.",
       "Added LONG (800ms left-button hold) and DRAG:dx,dy (held left-button movement) for iPhone long press and swipe gestures.",
-      "Added FINE movement, restart advertising after disconnect, and KEY modifier/usage reports with a BLE keyboard/mouse composite descriptor."
+      "Added FINE movement, restart advertising after disconnect, and KEY modifier/usage reports with a BLE keyboard/mouse composite descriptor.",
+      "Added BUTTON:1|2|4|8|16 to click an existing HID mouse button; button 4 (mask 8) can invoke the native current-app shortcut through AssistiveTouch.",
+      "Added SCROLL:signed_ticks (-24..24, nonzero) to send wheel-only HID reports without moving the pointer or holding a button; wheel scrolling physically verified on the calibrated iPhone."
     ]
   },
   "mouse_library": {

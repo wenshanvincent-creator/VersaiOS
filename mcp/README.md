@@ -6,6 +6,20 @@ Windows + ESP32-S3 BLE keyboard/mouse + iPhone, exposed as MCP tools. Agents sha
 
 ## One-call workflows
 
+### List scrolling
+
+`phone_scroll(direction="down", steps=4)` sends native BLE mouse-wheel reports. It does not hold a mouse button or move the pointer. Put the pointer over the intended list first. `steps` is 1–24 wheel ticks, not pixels. On the calibrated iPhone, `down` reveals later rows and `up` reveals earlier rows; keep its scrolling-direction setting unchanged and verify polarity on other devices.
+
+The ESP32 sketch now accepts `SCROLL:signed_ticks`; flash the updated **application firmware** before using this tool. The HID descriptor is unchanged from the composite keyboard/mouse version. `phone_swipe` remains a held-pointer gesture for other interactions, rather than serving as the default list-scrolling method.
+
+Physical acceptance on 2026-10-18: Settings and AssistiveTouch lists scrolled in both directions, the pointer stayed in place, and no list items or toggles were clicked. Four ticks moved the observed list about 93 image pixels; this is an observation, not a fixed pixels-per-tick contract. The previous Control Center drag macro did **not** open Control Center during this session; automatic mirroring remains calibration-dependent and can require manual connection. This release does not claim to fix that macro.
+
+### Fast app identity and concise results
+
+`phone_get_current_app()` returns native iOS Shortcuts metadata without an AirPlay image or a last-opened-app guess. It is optional and requires one-time local configuration; see [native app identity setup](docs/current-app.md). A live cloud MCP query returned Calculator with 357ms local device time and 1052ms server-side MCP round trip; model/client latency is excluded.
+
+`phone_run_actions` now defaults to `return_screen=False`. Request `True` when visual verification is needed, then inspect that returned image instead of requesting the same screen again. Successful responses omit serial/step traces but retain acknowledgement, verification state, completion count and total timing. Failure responses preserve partial progress and errors. These changes reduce payloads and unnecessary follow-up calls; no end-to-end model latency improvement is claimed.
+
 ```python
 phone_open_app(name="Calculator")               # phone already unlocked
 phone_unlock_and_open_app(name="Calculator")    # phone initially locked
@@ -58,17 +72,19 @@ Tested hardware: ESP32-S3 N16R8, CH343 USB bridge, iPhone 13 / iOS 26. Python 3.
 | `phone_move(token,dx,dy)` | Relative HID counts; right/down positive |
 | `phone_click(token)`, `phone_long_press(token)` | Current pointer; hold 800ms for long press |
 | `phone_swipe(token,dx,dy)` | Press/drag/release from current pointer; HID counts |
+| `phone_scroll(direction,steps=4,lease_token=None)` | Wheel-only list scrolling; up/down navigation on the calibrated device |
+| `phone_get_current_app(lease_token=None)` | Fresh native foreground-app Name, optional local Shortcut setup |
 | `phone_click_at(token,x,y,long_press=False)` | Experimental local visual positioning in screenshot pixels; return image |
 | `phone_register_app(token,name,x,y)` | Store a Home Screen icon template locally; no input |
 | `phone_run_macro(token,name)` | Calibrated Control Center/network/hotspot macros |
 | `phone_open_app(name,lease_token=None)` | Home → Spotlight → type name → first-result click |
 | `phone_unlock(lease_token=None)` | One fixed unlock attempt |
 | `phone_unlock_and_open_app(name,lease_token=None)` | Unlock and launch under one serial connection |
-| `phone_run_actions(actions,return_screen=True,lease_token=None)` | Entire validated plan runs locally under one serial connection |
+| `phone_run_actions(actions,return_screen=False,lease_token=None)` | Entire validated plan runs locally under one serial connection |
 
-For visual tasks: status → acquire → connect_screen → get_screen → input → get_screen → release. Each agent uses its own lease. Do not run the old non-leasing `phone.cmd` CLI while an MCP task owns the phone.
+For visual tasks: status → acquire → connect_screen → get_screen → input → inspect one resulting image → release. `phone_click_at` and image-returning batches already supply that image. For a single fixed task, tools with optional leases manage their own lease without extra acquire/release calls. Once sufficient outcome evidence is available, answer briefly instead of adding diagnostics. Each agent uses its own lease. Do not run the old non-leasing `phone.cmd` CLI while an MCP task owns the phone.
 
-Batch actions use `action` plus these fields: `home`; `open_app(name)`; `type_text(text)` (printable ASCII); `move(dx,dy)`; `swipe(dx,dy)`; `click`; `long_press`; `click_at(x,y,long_press=false)`; `wait(ms)`; `macro(name)`. Available batch macros: `control-center`, `network-menu`, `close-controls`, `hotspot-toggle`. Maximum 10 actions, 160 typed characters, 2000ms per wait / 5000ms total explicit waits. The full plan is validated before any input. Execution stops at the first failure; `completed_count` covers only completed actions, and the failing action may be partial. Never replay a failed batch automatically.
+Batch actions use `action` plus these fields: `home`; `open_app(name)`; `type_text(text)` (printable ASCII); `move(dx,dy)`; `swipe(dx,dy)`; `scroll(direction,steps=4)`; `key(usage,modifiers=0)`; `click`; `long_press`; `click_at(x,y,long_press=false)`; `wait(ms)`; `macro(name)`. Available batch macros: `control-center`, `network-menu`, `close-controls`, `hotspot-toggle`. Maximum 10 actions, 160 typed characters, 2000ms per wait / 5000ms total explicit waits. The full plan is validated before any input. Execution stops at the first failure; `completed_count` covers only completed actions, and the failing action may be partial. Never replay a failed batch automatically.
 
 `return_screen=True` requires mirroring before input. It returns one final fresh image; if that image is unavailable after execution, the result preserves completed actions and adds `screen_error`. `return_screen=False` needs no mirroring unless a `click_at` action is present. Mouse counts are **not pixels**. Hotspot is a **toggle**, may break mirroring, and cannot be called an idempotent enable operation. Batching does not authorize messages, purchases or other actions on its own.
 
@@ -86,7 +102,7 @@ For HTTP MCP, set `PHONE_MCP_TOKEN_FILE` to a private server-side Bearer token f
 
 - `phone_run_actions`: a real MCP call completed Calculator → Home → Settings in **9497ms**; device owner confirmed Settings on the physical phone. Show Onscreen Keyboard was enabled.
 - `phone_unlock_and_open_app("Calculator")`: one local broker call completed in **9657ms**; owner confirmed physical unlock and Calculator, with phone face down to avoid Face ID.
-- 5 focused regression tests cover preflight before input, stop-on-failure/partial progress, lease cleanup/reuse, final-image failure after input, and preserving unlock acknowledgement when app launch fails.
+- Focused regression tests cover wheel-vs-drag routing, wheel input validation and leases, batch preflight/partial progress, final-image failures, compact result evidence, and request-correlated native app metadata. Physical observations and software checks are separate evidence.
 - Earlier fixed unlock/open-app macros were physically confirmed. Experimental pixel clicking passed selected static targets, not general menus/animations. Do not claim broad pixel-click reliability or other iPhone layouts based on this release.
 
 The numbers above measure local device execution, **not full cloud round-trip latency**. Batch grouping removes repeated network/model turns; it does not accelerate iOS animations or each BLE report. The tools return input acknowledgements, not proof of UI success. A locked/black physical display may leave the last AirPlay image frozen; check the actual device or an appropriate fresh UI transition. No unlock retries or iOS lockout bypasses are implemented.

@@ -88,9 +88,25 @@ void loop() {
             move_relative_safe(x, y, 4);
             Serial.println(">>> [执行] 精细移动完成");
         }
+        else if (sscanf(cmd.c_str(), "SCROLL:%d", &x) == 1) {
+            if (x != 0 && x >= -24 && x <= 24) {
+                int direction = x > 0 ? 1 : -1;
+                for (int i = 0; i < abs(x); ++i) {
+                    bleMouse.move(0, 0, direction);
+                    delay(30);
+                }
+                Serial.println(">>> [执行] 滚轮完成");
+            }
+        }
         else if (cmd == "TAP") {
             bleMouse.click();
             Serial.println(">>> [执行] 原地点击完成！");
+        }
+        else if (sscanf(cmd.c_str(), "BUTTON:%d", &x) == 1) {
+            if (x == 1 || x == 2 || x == 4 || x == 8 || x == 16) {
+                bleMouse.click(x);
+                Serial.println(">>> [执行] 辅助按键完成");
+            }
         }
         else if (cmd == "LONG") {
             bleMouse.press(MOUSE_LEFT);

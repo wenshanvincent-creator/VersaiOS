@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-18",
+  "hardware": "ESP32-S3 N16R8 with CH343; calibrated iPhone 13 / iOS 26",
+  "protocol": "SCROLL:signed_ticks",
+  "firmware_compiled_and_flash_hash_verified": true,
+  "binary_sha256": "539fca754904f8d6bd445537b3e538e7b4ec0eee1fda254af889a95fb1075968",
+  "hid_descriptor_changed": false,
+  "physical_observations": {
+    "assistive_touch_list_both_directions": true,
+    "settings_list_calibrated_down_and_up": true,
+    "pointer_stationary": true,
+    "no_unintended_clicks_observed": true,
+    "settings_four_ticks_observed_displacement_pixels": 93,
+    "settings_down_batch_including_600ms_wait_ms": 776,
+    "settings_up_batch_including_600ms_wait_ms": 764
+  },
+  "known_limitations": [
+    "Wheel polarity matches this device's current scrolling setting; other settings/devices require verification",
+    "The existing Control Center drag macro failed in this session; automatic mirroring was not accepted and manual AirPlay connection was used",
+    "No fresh unlock/password test was performed",
+    "No clean-machine or reboot recovery acceptance was performed"
+  ]
+}

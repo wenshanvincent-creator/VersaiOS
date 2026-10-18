@@ -50,6 +50,8 @@ class PhoneController:
             "LONG": "长按完成", "DRAG": "拖动完成",
             "FINE": "精细移动完成",
             "KEY": "按键完成",
+            "BUTTON": "辅助按键完成",
+            "SCROLL": "滚轮完成",
         }
         return exchange(self.connection, command, acknowledgements[command.split(":")[0]])
 

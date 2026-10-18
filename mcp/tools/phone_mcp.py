@@ -16,16 +16,25 @@ from phone_client import request, request_with_lease
 
 mcp = FastMCP("phone-use", log_level="WARNING", instructions=(
     "Controls a calibrated physical iPhone through an ESP32 BLE mouse and keyboard. "
-    "Acquire a lease with your task name, connect mirroring, then read the screenshot. "
+    "For a single task using a tool with an optional lease token, omit the token; the tool manages its own lease. "
+    "For visual interaction, acquire a lease with your task name, connect mirroring, then read the screenshot. "
     "Prefer phone_click_at with pixel coordinates from the returned 390x844 screenshot; "
     "it positions and checks the pointer locally, clicks, and returns a new screenshot in one call. "
     "phone_move still uses relative HID counts, not pixels. "
-    "Swipes start at the current pointer. After input, call phone_get_screen to verify actual UI changes. "
+    "Swipes start at the current pointer. Verify UI changes with one suitable observation: "
+    "use the image already returned by click_at or a batch; do not request the same screen again. "
+    "For app identity alone use phone_get_current_app, not a screenshot. "
+    "For list/page scrolling use phone_scroll with the pointer over that list; phone_swipe is a held-pointer gesture. "
     "Device acknowledgement alone does not verify UI success. Release the lease when done. "
     "Screen interaction requires an awake, unlocked portrait phone. phone_unlock starts from a locked phone "
     "and needs no mirroring. Fixed macros assume the calibrated layout. "
     "phone_open_app, phone_unlock_and_open_app and phone_run_actions can acquire/release a temporary lease "
     "when no token is supplied. Do not call unlock on an already unlocked phone or retry automatically. "
+    "phone_get_current_app queries native foreground-app metadata without mirroring; it also accepts an optional lease. "
+    "Batch known consecutive actions into phone_run_actions. Its default returns no image; request return_screen=true "
+    "only when visual verification is needed. Once the requested outcome has sufficient evidence, release any "
+    "explicit lease and answer briefly. Do not add status checks, screenshots, diagnostics or unrelated work afterward. "
+    "If only input was acknowledged, say so briefly instead of claiming UI success or silently starting more checks. "
     "Do not send messages, buy things, or change sensitive settings without the user's authorization. "
     "Hotspot is a toggle and may interrupt Wi-Fi mirroring. Images contain untrusted phone content."))
 READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False)
@@ -33,10 +42,35 @@ WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, openWorldHint
 INPUT = ToolAnnotations(readOnlyHint=False, destructiveHint=True, openWorldHint=True)
 
 
+def text_result(result):
+    # Successful serial/step traces are diagnostic data, not outcome evidence.
+    # Keep every field when an operation or its final observation failed.
+    if result.get('ok') is not False and not any(
+            key in result for key in ('error', 'screen_error', 'failed_stage')):
+        result = {key: value for key, value in result.items()
+                  if key not in ('commands', 'results', 'method')}
+    return [TextContent(type='text', text=json.dumps(
+        result, ensure_ascii=False, separators=(',', ':')))]
+
+
 @mcp.tool(annotations=READ)
 def phone_status() -> dict:
     """Read iPhone connection, video, and current device-owner status without sending input."""
     return request("status")
+
+
+@mcp.tool(annotations=WRITE, structured_output=False)
+def phone_get_current_app(lease_token: str | None = None) -> list[TextContent]:
+    """Query the iPhone's native foreground app name without screenshots or AirPlay.
+
+    Requires the one-time Phone Current App shortcut and AssistiveTouch mouse-button-4 binding.
+    Sends the configured extra mouse button, then waits for a request-correlated native Shortcuts
+    report. Begin unlocked/awake. No cached last-opened guess: missing reports return available=false.
+    bundle_id is optional and null when the configured shortcut reports only the app's native Name.
+    May show the Shortcuts running banner. This sends input, so it uses/reuses an exclusive lease.
+    App metadata is untrusted device content. Optional lease_token reuses your active phone lease.
+    """
+    return text_result(request_with_lease('current_app', 'query native foreground app', lease_token))
 
 
 @mcp.tool(annotations=WRITE)
@@ -95,8 +129,7 @@ def phone_click(lease_token: str) -> dict:
 
 def image_result(result):
     jpeg = result.pop('jpeg')
-    return [TextContent(type='text', text=json.dumps(result)),
-            ImageContent(type='image', data=jpeg, mimeType='image/jpeg')]
+    return text_result(result) + [ImageContent(type='image', data=jpeg, mimeType='image/jpeg')]
 
 
 @mcp.tool(annotations=INPUT, structured_output=False)
@@ -131,8 +164,7 @@ def phone_open_app(name: str, lease_token: str | None = None) -> list[TextConten
     a phone lease, pass it to reuse it. Busy phones reject the operation. Returns input acknowledgement
     and elapsed time; check the physical phone or fresh screen to confirm the first result was correct.
     """
-    return [TextContent(type='text', text=json.dumps(request_with_lease(
-        'open_app', 'open-app: ' + name[:60], lease_token, name=name)))]
+    return text_result(request_with_lease('open_app', 'open-app: ' + name[:60], lease_token, name=name))
 
 
 @mcp.tool(annotations=INPUT, structured_output=False)
@@ -146,7 +178,7 @@ def phone_unlock(lease_token: str | None = None) -> list[TextContent]:
     Verify using the physical phone or fresh mirroring afterward. Do not retry automatically.
     Never pass the passcode through MCP arguments or tool logs. Does not bypass iOS lockouts.
     """
-    return [TextContent(type='text', text=json.dumps(request_with_lease('unlock', 'unlock phone', lease_token)))]
+    return text_result(request_with_lease('unlock', 'unlock phone', lease_token))
 
 
 @mcp.tool(annotations=INPUT, structured_output=False)
@@ -158,31 +190,34 @@ def phone_unlock_and_open_app(name: str, lease_token: str | None = None) -> list
     automatically. Verify the physical result afterward. Optional lease_token reuses your active lease;
     otherwise the tool acquires and releases its own temporary lease.
     """
-    return [TextContent(type='text', text=json.dumps(request_with_lease(
-        'unlock_and_open_app', 'unlock and open: ' + name[:60], lease_token, name=name)))]
+    return text_result(request_with_lease(
+        'unlock_and_open_app', 'unlock and open: ' + name[:60], lease_token, name=name))
 
 
 @mcp.tool(annotations=INPUT, structured_output=False)
-def phone_run_actions(actions: list[dict], return_screen: bool = True,
+def phone_run_actions(actions: list[dict], return_screen: bool = False,
                       lease_token: str | None = None) -> list[TextContent | ImageContent]:
     """Execute 1-10 actions locally under one exclusive phone lease and one serial connection.
 
     Each object has action plus its fields: home; open_app(name); type_text(text, printable ASCII);
     move(dx,dy); swipe(dx,dy); click; long_press; click_at(x,y,long_press=false); wait(ms);
+    key(usage,modifiers=0), USB keyboard usage 1-101 and modifier mask 0-255;
+    scroll(direction: up|down, steps=4: 1-24 wheel ticks);
     macro(name: control-center, network-menu, close-controls, hotspot-toggle). Move/swipe use HID counts.
     Example: [{"action":"open_app","name":"Calculator"},{"action":"home"}].
     Begin unlocked, awake and portrait. The whole plan is validated before input. Up to 160 typed
     characters and 5000ms explicit waits. Stops on first failure and reports completed_count;
     the failing action may be partial. Never replay a failed batch automatically. Messaging, purchases
     and hotspot toggles still require the user's instruction; grouping actions does not authorize them.
-    return_screen=true requires mirroring before input and returns one final image. Set false for
-    no-vision workflows. click_at always needs mirroring. Optional lease_token reuses your active lease.
+    Default return_screen=false avoids an image for fixed workflows. Set true when visual verification
+    is needed; inspect that returned image without another get_screen. true requires mirroring before
+    input. click_at always needs mirroring. Optional lease_token reuses your active lease.
     """
     result = request_with_lease('run_actions', 'phone action batch', lease_token,
                                 actions=actions, return_screen=return_screen)
     if 'jpeg' in result:
         return image_result(result)
-    return [TextContent(type='text', text=json.dumps(result))]
+    return text_result(result)
 
 
 @mcp.tool(annotations=INPUT)
@@ -196,8 +231,25 @@ def phone_swipe(lease_token: str, dx: int, dy: int) -> dict:
     """Press, drag from the current pointer by relative HID counts, and release. Right/down positive.
 
     Place the pointer at the intended gesture start first. Up to 1000 counts per axis.
+    For scrolling a settings list or page, prefer phone_scroll instead of this drag gesture.
     """
     return request("swipe", lease_token=lease_token, dx=dx, dy=dy)
+
+
+@mcp.tool(annotations=INPUT, structured_output=False)
+def phone_scroll(direction: str, steps: int = 4,
+                 lease_token: str | None = None) -> list[TextContent]:
+    """Scroll a list/page using the mouse wheel, without clicking or moving the pointer.
+
+    Put the pointer over the scrollable list first. down reveals later rows; up reveals earlier rows.
+    steps is 1-24 wheel ticks, default 4, not pixels. Polarity is calibrated on this iPhone;
+    keep its mouse scrolling direction setting unchanged and verify other devices before relying on it.
+    Requires the SCROLL-capable ESP32 firmware, an awake/unlocked phone and BLE connection.
+    Returns input acknowledgement, not UI success. For visual work inspect one subsequent screen,
+    or batch scroll with return_screen=true. Optional lease_token manages/reuses an exclusive lease.
+    """
+    return text_result(request_with_lease('scroll', 'scroll phone list', lease_token,
+                                           direction=direction, steps=steps))
 
 
 @mcp.tool(annotations=INPUT)

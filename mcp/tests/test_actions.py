@@ -24,12 +24,36 @@ class ActionsTest(unittest.TestCase):
     def test_invalid_later_action_prevents_all_input(self):
         broker = self.broker()
         for bad in ({'action': 'type_text', 'text': '\n'}, {'action': []},
-                    {'action': 'macro', 'name': {}}, {'action': 'click', 'unknown': 1}):
+                    {'action': 'macro', 'name': {}}, {'action': 'click', 'unknown': 1},
+                    {'action': 'scroll', 'direction': 'sideways'},
+                    {'action': 'scroll', 'direction': 'down', 'steps': True},
+                    {'action': 'scroll', 'direction': 'down', 'steps': 25}):
             with self.subTest(bad=bad), patch('phone_broker.PhoneController') as controller:
                 with self.assertRaises(ValueError):
                     broker.handle('run_actions', {'lease_token': 'test-token',
                                   'actions': [{'action': 'click'}, bad]})
                 controller.assert_not_called()
+
+    def test_list_scroll_uses_wheel_and_keeps_swipe_gestures(self):
+        phone = Mock()
+        result = ActionBatch([{'action': 'scroll', 'direction': 'down'},
+                              {'action': 'scroll', 'direction': 'up', 'steps': 2},
+                              {'action': 'swipe', 'dx': 0, 'dy': -120}]).run(phone, Mock())
+        self.assertTrue(result['ok'])
+        self.assertEqual([c.args[0] for c in phone.send.call_args_list],
+                         ['SCROLL:4', 'SCROLL:-2', 'DRAG:0,-120'])
+
+    def test_scroll_broker_validates_before_serial_and_requires_lease(self):
+        broker = self.broker()
+        with patch('phone_broker.PhoneController') as controller:
+            with self.assertRaises(ValueError):
+                broker.handle('scroll', {'lease_token': 'test-token', 'direction': 'down', 'steps': 0})
+            with self.assertRaises(RuntimeError):
+                broker.handle('scroll', {'lease_token': 'wrong', 'direction': 'down'})
+            controller.assert_not_called()
+            result = broker.handle('scroll', {'lease_token': 'test-token', 'direction': 'down', 'steps': 3})
+            controller.return_value.__enter__.return_value.send.assert_called_once_with('SCROLL:3')
+            self.assertFalse(result['visual_result_verified'])
 
     def test_partial_batch_stops_without_replaying_or_echoing_text(self):
         phone = Mock()
