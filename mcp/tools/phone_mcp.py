@@ -97,7 +97,8 @@ def phone_connect_screen(lease_token: str) -> dict:
     Begin in an ordinary app/home screen, unlocked and portrait, with Control Center/dialogs closed.
     VersaiOS_Screen must be first in the receiver list and reachable on Wi-Fi. Checks for real video frames.
     Initial setup restarts the receiver to add a phone-only frame stream. Later calls reuse it.
-    Requires the recorded AssistiveTouch button/menu positions in phone_macros.json. Already connected
+    Requires Perform Touch Gestures off and the recorded portrait layout in phone_macros.json;
+    opens Control Center with a top-right swipe, without the floating menu. Already connected
     streams reuse their latest valid frame without phone input or waiting for a second frame.
     """
     return request("connect", lease_token=lease_token)

@@ -4,12 +4,10 @@
   "network_interface": "WLAN",
   "mirroring_calibration": {
     "image_size": [390, 844],
-    "assistive_button": [225, 65],
-    "assistive_control_center": [313, 294],
-    "assistive_home": [225, 294],
+    "perform_touch_gestures": false,
     "mirror_button_shared_target": [153, 345],
     "receiver_first_row": [160, 390],
-    "note": "Portrait, fixed pointer speed/menu layout; first receiver is VersaiOS_Screen. Old unlock recording uses a different floating-button position."
+    "note": "Portrait, fixed pointer speed, Perform Touch Gestures off; swipe down from top-right. Mirror target overlaps the two observed layouts shifted by 30 pixels. First receiver is VersaiOS_Screen. Mirroring does not use the floating button."
   },
   "macros": {
     "app-search-first-result": [
@@ -32,19 +30,10 @@
       {"press": "FINE:240,154", "wait": 0.08},
       {"press": "TAP", "wait": 0.3}
     ],
-    "assistive-menu": [
-      {"move": [-1200, -2400], "wait": 0.4},
-      {"press": "FINE:160,160", "wait": 0.4},
-      {"press": "FINE:234,-19", "wait": 0.4},
-      {"press": "FINE:19,5", "wait": 0.4},
-      {"press": "TAP", "wait": 0.45}
-    ],
     "control-center": [
-      {"call": "assistive-menu"},
-      {"move": [-1200, -2400], "wait": 0.4},
-      {"press": "FINE:160,160", "wait": 0.4},
-      {"press": "FINE:429,553", "wait": 0.4},
-      {"press": "TAP", "wait": 0.6}
+      {"move": [1200, -2400], "wait": 0.3},
+      {"move": [-25, 8], "wait": 0.25},
+      {"drag": [0, 220], "wait": 0.8}
     ],
     "network-menu": [
       {"call": "control-center"},
@@ -68,12 +57,10 @@
     ],
     "mirror-close": [
       {"call": "dismiss-overlay"},
-      {"call": "assistive-menu"},
-      {"move": [-1200, -2400], "wait": 0.4},
-      {"press": "FINE:160,160", "wait": 0.4},
-      {"press": "FINE:233,554", "wait": 0.4},
+      {"move": [-1200, 2400], "wait": 0.3},
+      {"press": "FINE:260,-50", "wait": 0.4},
       {"press": "TAP", "wait": 0.6},
-      {"call": "dismiss-overlay"}
+      {"press": "KEY:8,11", "wait": 0.3}
     ],
     "dismiss-overlay": [
       {"move": [-1200, 0], "wait": 0.3},

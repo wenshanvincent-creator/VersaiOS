@@ -8,11 +8,13 @@ Windows + ESP32-S3 BLE keyboard/mouse + iPhone, exposed as MCP tools. Agents sha
 
 ### Automatic mirroring repair
 
-The mirroring recording now opens Control Center through its AssistiveTouch menu action, clicks the mirror tile in the shared hit area of two observed layouts, and selects the first receiver. After connection, it dismisses the mirroring overlay, invokes native AssistiveTouch Home, and dismisses the AssistiveTouch menu. It uses a dedicated `mirror-close` sequence; the hotspot's `close-controls` sequence is unchanged.
+Mirroring uses the original top-right downward swipe to open Control Center, then clicks the shared mirror-tile target `(153,345)` and selects the first receiver. It dismisses the mirroring overlay, clicks the bottom background to close Control Center, and sends keyboard Home. It never uses the floating AssistiveTouch button. The hotspot's `close-controls` sequence is unchanged.
 
-Physical acceptance on 2026-10-18: after restarting the receiver/broker, one MCP call connected without manual phone input, received new video frames, and finished on an unobstructed Home Screen. Cold reconnect took **38974ms**; an already-connected call took **460ms** and returned `commands:[]`. Reuse accepts the latest still-valid frame rather than waiting for another frame on a static screen. Initial connection must receive a frame newer than the start of the connection sequence. See [acceptance record](firmware/mirror-validation.json).
+On the tested iPhone, the same original drag failed while **Perform Touch Gestures** was enabled and opened Control Center after it was disabled. Keep **Settings → Accessibility → Touch → AssistiveTouch → Perform Touch Gestures** off for this recording. This is a device observation, not a claim about every iOS version. Two observed Control Center layouts differ by about 30 image pixels; the mirror target lies in their shared hit area.
 
-This is a recorded iPhone layout, not universal UI automation. `mirroring_calibration` in `tools/phone_macros.json` lists the assumptions: portrait 390×844, unchanged pointer speed, AssistiveTouch floating button at `(225,65)`, recorded menu actions, and `VersaiOS_Screen` as the first receiver. The old unlock example uses floating position `(39,423)`; re-record one of these before combining unlock and mirroring on the same layout. Unlock was not revalidated in this session.
+Physical acceptance on 2026-10-18: starting from visually confirmed Home, the receiver was restarted and one MCP call reconnected without manual phone input, received fresh frames and finished on an unobstructed Home Screen. The final cold reconnect took **24403ms**. One earlier attempt failed from an unverified starting screen; this is not a broad reliability or reboot-recovery claim. See [acceptance record](firmware/mirror-validation.json). No firmware change was needed.
+
+Requirements: unlocked, awake, portrait 390×844, unchanged pointer speed, closed panels and `VersaiOS_Screen` as the first receiver. Mirroring has no floating-button position requirement. The separate unlock example still requires its own recorded button/menu layout and was not revalidated. Already-connected calls retain the previous no-input reuse behavior.
 
 ### List scrolling
 
@@ -20,7 +22,7 @@ This is a recorded iPhone layout, not universal UI automation. `mirroring_calibr
 
 The ESP32 sketch now accepts `SCROLL:signed_ticks`; flash the updated **application firmware** before using this tool. The HID descriptor is unchanged from the composite keyboard/mouse version. `phone_swipe` remains a held-pointer gesture for other interactions, rather than serving as the default list-scrolling method.
 
-Physical acceptance on 2026-10-18: Settings and AssistiveTouch lists scrolled in both directions, the pointer stayed in place, and no list items or toggles were clicked. Four ticks moved the observed list about 93 image pixels; this is an observation, not a fixed pixels-per-tick contract. The earlier Control Center drag macro failed during scroll acceptance; the subsequent mirroring repair above replaces that path for the recorded layout.
+Physical acceptance on 2026-10-18: Settings and AssistiveTouch lists scrolled in both directions, the pointer stayed in place, and no list items or toggles were clicked. Four ticks moved the observed list about 93 image pixels; this is an observation, not a fixed pixels-per-tick contract. The earlier Control Center drag macro failed during scroll acceptance; the diagnosis and restored edge-swipe path are documented above.
 
 ### Fast app identity and concise results
 

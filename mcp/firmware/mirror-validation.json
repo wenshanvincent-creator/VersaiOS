@@ -1,19 +1,27 @@
 {
   "date": "2026-10-18",
-  "path": "AssistiveTouch menu, Control Center, mirror tile, first receiver, native AssistiveTouch Home, dismiss overlay",
-  "fresh_receiver_and_broker_started": true,
-  "cold_reconnect_ms": 38974,
-  "new_video_frame_id": 267,
-  "new_video_frame_age_ms": 20,
+  "path": "top-right swipe, shared mirror tile target, first receiver, dismiss overlay, tap bottom background, keyboard Home",
+  "perform_touch_gestures": false,
+  "firmware_changed": false,
+  "floating_button_used": false,
+  "diagnosis": "Same original drag failed with Perform Touch Gestures on and opened Control Center after turning it off on this device",
+  "observed_control_center_layout_offset_pixels": 30,
+  "mirror_shared_target": [
+    153,
+    345
+  ],
+  "receiver_restarted": true,
+  "cold_reconnect_ms": 24403,
+  "new_video_frame_id": 11570,
+  "new_video_frame_age_ms": 40,
   "final_home_screen_observed": true,
-  "final_home_frame_id": 287,
-  "already_connected_reuse_ms": 460,
-  "reuse_commands": [],
+  "final_home_frame_id": 11735,
   "lease_released": true,
   "limits": [
-    "Recorded portrait iPhone 13 layout and unchanged pointer speed",
-    "AssistiveTouch floating button at 225,65 and recorded menu actions",
+    "Unlocked portrait iPhone 13, fixed pointer speed and recorded Control Center layout",
+    "Perform Touch Gestures must remain off for the tested edge-swipe path",
     "VersaiOS_Screen is the first receiver row",
-    "Old unlock example uses a different floating-button position and was not revalidated"
+    "One earlier reconnect failed from an unverified starting screen; the final test began from visually confirmed Home",
+    "No unlock/password test, clean-install test or phone reboot recovery test"
   ]
 }
