@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "phone-use": {
+      "command": "C:/path/to/VersaiOS/mcp/.venv/Scripts/python.exe",
+      "args": [
+        "C:/path/to/VersaiOS/mcp/tools/phone_mcp.py"
+      ]
+    }
+  }
+}

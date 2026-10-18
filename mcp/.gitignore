@@ -1,0 +1,7 @@
+.venv/
+.runtime/
+build/
+dependencies/
+**/__pycache__/
+tools/phone_unlock_private.py
+*.local.json

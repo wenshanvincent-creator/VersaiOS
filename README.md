@@ -1,3 +1,9 @@
+# VersaiOS + iPhone MCP
+
+This fork adds a Windows MCP extension for shared iPhone control: local AirPlay frames, exclusive leases, fixed unlock/app-launch macros, and batched actions. See **[MCP setup and verified capabilities](mcp/README.md)**. The original project and GUI remain below.
+
+---
+
 # 🤖 VersaiOS: AI-Driven iOS Physical Automation Agent
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

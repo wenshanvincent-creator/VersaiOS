@@ -1,0 +1,63 @@
+{
+  "device": "iPhone 13 / iOS 26, portrait, current pointer speed and Control Center layout",
+  "receiver_name": "VersaiOS_Screen",
+  "network_interface": "WLAN",
+  "macros": {
+    "app-search-first-result": [
+      {"move": [-1200, -2400], "wait": 0.05},
+      {"press": "FINE:160,160", "wait": 0.02},
+      {"press": "FINE:-77,81", "wait": 0.02},
+      {"press": "FINE:-39,39", "wait": 0.08},
+      {"press": "TAP", "wait": 0.3}
+    ],
+    "unlock-menu": [
+      {"move": [-1200, -2400], "wait": 0.05},
+      {"press": "FINE:160,160", "wait": 0.02},
+      {"press": "FINE:-115,400", "wait": 0.02},
+      {"press": "FINE:-57,363", "wait": 0.02},
+      {"press": "FINE:-5,57", "wait": 0.02},
+      {"press": "FINE:-1,12", "wait": 0.08},
+      {"press": "TAP", "wait": 0.25}
+    ],
+    "unlock-home-action": [
+      {"press": "FINE:240,154", "wait": 0.08},
+      {"press": "TAP", "wait": 0.3}
+    ],
+    "control-center": [
+      {"move": [1200, -2400], "wait": 0.3},
+      {"move": [-25, 8], "wait": 0.25},
+      {"drag": [0, 220], "wait": 0.8}
+    ],
+    "network-menu": [
+      {"call": "control-center"},
+      {"move": [-1200, -2400], "wait": 0.3},
+      {"move": [55, 125], "wait": 0.3},
+      {"press": "LONG", "wait": 0.7}
+    ],
+    "mirror-menu": [
+      {"call": "control-center"},
+      {"move": [-1200, -2400], "wait": 0.3},
+      {"move": [80, 225], "wait": 0.3},
+      {"press": "TAP", "wait": 8.0}
+    ],
+    "close-controls": [
+      {"move": [-1200, 2400], "wait": 0.3},
+      {"move": [110, 0], "wait": 0.25},
+      {"press": "TAP", "wait": 0.8},
+      {"press": "TAP", "wait": 0.8}
+    ],
+    "hotspot-toggle": [
+      {"call": "network-menu"},
+      {"move": [-1200, -2400], "wait": 0.3},
+      {"move": [100, 340], "wait": 0.3},
+      {"press": "TAP", "wait": 0.8},
+      {"call": "close-controls"}
+    ],
+    "mirror-connect": [
+      {"call": "mirror-menu"},
+      {"move": [-1200, -2400], "wait": 0.3},
+      {"move": [90, 240], "wait": 0.3},
+      {"press": "TAP", "wait": 1.0}
+    ]
+  }
+}

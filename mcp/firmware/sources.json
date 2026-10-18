@@ -1,0 +1,32 @@
+{
+  "firmware": {
+    "repository": "https://github.com/zhaodashuaibi/VersaiOS",
+    "commit": "5619a233a124df80b01477239d2bc60797c41998",
+    "path": "hardware/esp32_ble_mouse/VersaiOS.ino",
+    "local_path": "firmware/VersaiOS/VersaiOS.ino",
+    "modified": true,
+    "local_changes": [
+      "Added TAP to click at the current pointer position after visual relative movement, without running coordinate re-homing.",
+      "Added LONG (800ms left-button hold) and DRAG:dx,dy (held left-button movement) for iPhone long press and swipe gestures.",
+      "Added FINE movement, restart advertising after disconnect, and KEY modifier/usage reports with a BLE keyboard/mouse composite descriptor."
+    ]
+  },
+  "mouse_library": {
+    "repository": "https://github.com/T-vK/ESP32-BLE-Mouse",
+    "commit": "ba38caa695cece3cf06ff67b203e9400efe546f4"
+  },
+  "active_hid_library": {
+    "repository": "https://github.com/blackketter/ESP32-BLE-Combo",
+    "commit": "b25c1cb9dbff64374d2fd4ad307a184506eb9232",
+    "local_path": "dependencies/ESP32-BLE-Combo",
+    "pairing_note": "The composite keyboard/mouse report descriptor replaces the original mouse-only descriptor. Forget and pair VersaiOS Mouse again after this upgrade."
+  },
+  "arduino_esp32_core": "2.0.17",
+  "fqbn": "esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi,FlashMode=qio,PartitionScheme=app3M_fat9M_16MB,USBMode=hwcdc,CDCOnBoot=default,UploadSpeed=115200",
+  "device_identified": {
+    "port": "COM6",
+    "chip": "ESP32-S3",
+    "flash_mb": 16,
+    "embedded_psram_mb": 8
+  }
+}
