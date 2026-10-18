@@ -84,6 +84,7 @@ class Phone:
             if action == "connect":
                 if self.receiver is None or not self.receiver.is_running():
                     self.receiver = ensure_receiver(video_converter=video_converter(), restart=True)
+                starting_frame = self.video.frame_id
                 commands = []
                 if not mirror_connected(self.receiver):
                     with PhoneController() as phone:
@@ -96,8 +97,8 @@ class Phone:
                         if not mirror_connected(self.receiver):
                             raise RuntimeError("No AirPlay video connection after fixed mirror-connect steps")
                         time.sleep(1)
-                        run_steps(phone, "close-controls", commands)
-                _, screen = self.video.snapshot(10, after_frame=self.video.frame_id)
+                        run_steps(phone, "mirror-close", commands)
+                _, screen = self.video.snapshot(10, after_frame=starting_frame if commands else None)
                 return {"mirror_connected": True, "screen": screen, "commands": commands}
             if action == "screen":
                 if not self.connected():

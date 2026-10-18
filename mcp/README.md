@@ -6,13 +6,21 @@ Windows + ESP32-S3 BLE keyboard/mouse + iPhone, exposed as MCP tools. Agents sha
 
 ## One-call workflows
 
+### Automatic mirroring repair
+
+The mirroring recording now opens Control Center through its AssistiveTouch menu action, clicks the mirror tile in the shared hit area of two observed layouts, and selects the first receiver. After connection, it dismisses the mirroring overlay, invokes native AssistiveTouch Home, and dismisses the AssistiveTouch menu. It uses a dedicated `mirror-close` sequence; the hotspot's `close-controls` sequence is unchanged.
+
+Physical acceptance on 2026-10-18: after restarting the receiver/broker, one MCP call connected without manual phone input, received new video frames, and finished on an unobstructed Home Screen. Cold reconnect took **38974ms**; an already-connected call took **460ms** and returned `commands:[]`. Reuse accepts the latest still-valid frame rather than waiting for another frame on a static screen. Initial connection must receive a frame newer than the start of the connection sequence. See [acceptance record](firmware/mirror-validation.json).
+
+This is a recorded iPhone layout, not universal UI automation. `mirroring_calibration` in `tools/phone_macros.json` lists the assumptions: portrait 390×844, unchanged pointer speed, AssistiveTouch floating button at `(225,65)`, recorded menu actions, and `VersaiOS_Screen` as the first receiver. The old unlock example uses floating position `(39,423)`; re-record one of these before combining unlock and mirroring on the same layout. Unlock was not revalidated in this session.
+
 ### List scrolling
 
 `phone_scroll(direction="down", steps=4)` sends native BLE mouse-wheel reports. It does not hold a mouse button or move the pointer. Put the pointer over the intended list first. `steps` is 1–24 wheel ticks, not pixels. On the calibrated iPhone, `down` reveals later rows and `up` reveals earlier rows; keep its scrolling-direction setting unchanged and verify polarity on other devices.
 
 The ESP32 sketch now accepts `SCROLL:signed_ticks`; flash the updated **application firmware** before using this tool. The HID descriptor is unchanged from the composite keyboard/mouse version. `phone_swipe` remains a held-pointer gesture for other interactions, rather than serving as the default list-scrolling method.
 
-Physical acceptance on 2026-10-18: Settings and AssistiveTouch lists scrolled in both directions, the pointer stayed in place, and no list items or toggles were clicked. Four ticks moved the observed list about 93 image pixels; this is an observation, not a fixed pixels-per-tick contract. The previous Control Center drag macro did **not** open Control Center during this session; automatic mirroring remains calibration-dependent and can require manual connection. This release does not claim to fix that macro.
+Physical acceptance on 2026-10-18: Settings and AssistiveTouch lists scrolled in both directions, the pointer stayed in place, and no list items or toggles were clicked. Four ticks moved the observed list about 93 image pixels; this is an observation, not a fixed pixels-per-tick contract. The earlier Control Center drag macro failed during scroll acceptance; the subsequent mirroring repair above replaces that path for the recorded layout.
 
 ### Fast app identity and concise results
 

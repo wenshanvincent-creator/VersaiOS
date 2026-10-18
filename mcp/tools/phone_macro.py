@@ -75,7 +75,7 @@ def main():
                         raise RuntimeError("No AirPlay video connection after fixed device-selection steps")
                     result["mirror_connected"] = True
                     time.sleep(1.0)
-                    run_steps(phone, "close-controls", result["commands"])
+                    run_steps(phone, "mirror-close", result["commands"])
                     result["result"] = "connected"
                 else:
                     result["result"] = "input_sequence_acknowledged"

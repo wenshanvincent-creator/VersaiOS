@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-18",
+  "path": "AssistiveTouch menu, Control Center, mirror tile, first receiver, native AssistiveTouch Home, dismiss overlay",
+  "fresh_receiver_and_broker_started": true,
+  "cold_reconnect_ms": 38974,
+  "new_video_frame_id": 267,
+  "new_video_frame_age_ms": 20,
+  "final_home_screen_observed": true,
+  "final_home_frame_id": 287,
+  "already_connected_reuse_ms": 460,
+  "reuse_commands": [],
+  "lease_released": true,
+  "limits": [
+    "Recorded portrait iPhone 13 layout and unchanged pointer speed",
+    "AssistiveTouch floating button at 225,65 and recorded menu actions",
+    "VersaiOS_Screen is the first receiver row",
+    "Old unlock example uses a different floating-button position and was not revalidated"
+  ]
+}

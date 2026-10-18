@@ -2,6 +2,15 @@
   "device": "iPhone 13 / iOS 26, portrait, current pointer speed and Control Center layout",
   "receiver_name": "VersaiOS_Screen",
   "network_interface": "WLAN",
+  "mirroring_calibration": {
+    "image_size": [390, 844],
+    "assistive_button": [225, 65],
+    "assistive_control_center": [313, 294],
+    "assistive_home": [225, 294],
+    "mirror_button_shared_target": [153, 345],
+    "receiver_first_row": [160, 390],
+    "note": "Portrait, fixed pointer speed/menu layout; first receiver is VersaiOS_Screen. Old unlock recording uses a different floating-button position."
+  },
   "macros": {
     "app-search-first-result": [
       {"move": [-1200, -2400], "wait": 0.05},
@@ -23,10 +32,19 @@
       {"press": "FINE:240,154", "wait": 0.08},
       {"press": "TAP", "wait": 0.3}
     ],
+    "assistive-menu": [
+      {"move": [-1200, -2400], "wait": 0.4},
+      {"press": "FINE:160,160", "wait": 0.4},
+      {"press": "FINE:234,-19", "wait": 0.4},
+      {"press": "FINE:19,5", "wait": 0.4},
+      {"press": "TAP", "wait": 0.45}
+    ],
     "control-center": [
-      {"move": [1200, -2400], "wait": 0.3},
-      {"move": [-25, 8], "wait": 0.25},
-      {"drag": [0, 220], "wait": 0.8}
+      {"call": "assistive-menu"},
+      {"move": [-1200, -2400], "wait": 0.4},
+      {"press": "FINE:160,160", "wait": 0.4},
+      {"press": "FINE:429,553", "wait": 0.4},
+      {"press": "TAP", "wait": 0.6}
     ],
     "network-menu": [
       {"call": "control-center"},
@@ -36,15 +54,30 @@
     ],
     "mirror-menu": [
       {"call": "control-center"},
-      {"move": [-1200, -2400], "wait": 0.3},
-      {"move": [80, 225], "wait": 0.3},
-      {"press": "TAP", "wait": 8.0}
+      {"move": [-1200, -2400], "wait": 0.4},
+      {"press": "FINE:160,160", "wait": 0.4},
+      {"press": "FINE:73,681", "wait": 0.4},
+      {"press": "FINE:-4,-29", "wait": 0.4},
+      {"press": "TAP", "wait": 1.5}
     ],
     "close-controls": [
       {"move": [-1200, 2400], "wait": 0.3},
       {"move": [110, 0], "wait": 0.25},
       {"press": "TAP", "wait": 0.8},
       {"press": "TAP", "wait": 0.8}
+    ],
+    "mirror-close": [
+      {"call": "dismiss-overlay"},
+      {"call": "assistive-menu"},
+      {"move": [-1200, -2400], "wait": 0.4},
+      {"press": "FINE:160,160", "wait": 0.4},
+      {"press": "FINE:233,554", "wait": 0.4},
+      {"press": "TAP", "wait": 0.6},
+      {"call": "dismiss-overlay"}
+    ],
+    "dismiss-overlay": [
+      {"move": [-1200, 0], "wait": 0.3},
+      {"press": "TAP", "wait": 0.5}
     ],
     "hotspot-toggle": [
       {"call": "network-menu"},
@@ -55,8 +88,10 @@
     ],
     "mirror-connect": [
       {"call": "mirror-menu"},
-      {"move": [-1200, -2400], "wait": 0.3},
-      {"move": [90, 240], "wait": 0.3},
+      {"move": [-1200, -2400], "wait": 0.4},
+      {"press": "FINE:160,160", "wait": 0.4},
+      {"press": "FINE:89,794", "wait": 0.4},
+      {"press": "FINE:-2,-32", "wait": 0.4},
       {"press": "TAP", "wait": 1.0}
     ]
   }
